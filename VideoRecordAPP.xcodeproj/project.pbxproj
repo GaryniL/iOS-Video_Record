@@ -14,6 +14,7 @@
 		4E00D4AF22DDF9A5007D6D15 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4E00D4AD22DDF9A5007D6D15 /* LaunchScreen.storyboard */; };
 		4E00D4B222DDF9A5007D6D15 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E00D4B122DDF9A5007D6D15 /* main.m */; };
 		4E1E039C22DEFD2200803E4E /* CameraSessionController+AV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E039B22DEFD2200803E4E /* CameraSessionController+AV.m */; };
+		4E1E03A022DF2B1400803E4E /* VideoPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E039F22DF2B1400803E4E /* VideoPreviewController.m */; };
 		4EF041DE22DE0229003F6F79 /* CameraHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF041DD22DE0229003F6F79 /* CameraHelper.m */; };
 		4EF041E122DE0BF2003F6F79 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF041E022DE0BF2003F6F79 /* CameraViewController.m */; };
 		4EF041E422DE100B003F6F79 /* CameraViewController+View.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF041E322DE100B003F6F79 /* CameraViewController+View.m */; };
@@ -34,6 +35,8 @@
 		4E00D4B122DDF9A5007D6D15 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4E1E039922DED26200803E4E /* CameraSessionViewSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CameraSessionViewSource.h; sourceTree = "<group>"; };
 		4E1E039B22DEFD2200803E4E /* CameraSessionController+AV.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CameraSessionController+AV.m"; sourceTree = "<group>"; };
+		4E1E039E22DF2B1400803E4E /* VideoPreviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoPreviewController.h; sourceTree = "<group>"; };
+		4E1E039F22DF2B1400803E4E /* VideoPreviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoPreviewController.m; sourceTree = "<group>"; };
 		4EF041DC22DE0229003F6F79 /* CameraHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CameraHelper.h; sourceTree = "<group>"; };
 		4EF041DD22DE0229003F6F79 /* CameraHelper.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CameraHelper.m; sourceTree = "<group>"; };
 		4EF041DF22DE0BF2003F6F79 /* CameraViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CameraViewController.h; sourceTree = "<group>"; };
@@ -90,6 +93,18 @@
 			path = VideoRecordAPP;
 			sourceTree = "<group>";
 		};
+		4E1E039D22DF2AEF00803E4E /* ViewController */ = {
+			isa = PBXGroup;
+			children = (
+				4EF041DF22DE0BF2003F6F79 /* CameraViewController.h */,
+				4EF041E022DE0BF2003F6F79 /* CameraViewController.m */,
+				4EF041E322DE100B003F6F79 /* CameraViewController+View.m */,
+				4E1E039E22DF2B1400803E4E /* VideoPreviewController.h */,
+				4E1E039F22DF2B1400803E4E /* VideoPreviewController.m */,
+			);
+			path = ViewController;
+			sourceTree = "<group>";
+		};
 		4EF041D622DDFE1B003F6F79 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -102,10 +117,8 @@
 		4EF041E222DE0BF9003F6F79 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				4E1E039D22DF2AEF00803E4E /* ViewController */,
 				4E1E039922DED26200803E4E /* CameraSessionViewSource.h */,
-				4EF041DF22DE0BF2003F6F79 /* CameraViewController.h */,
-				4EF041E022DE0BF2003F6F79 /* CameraViewController.m */,
-				4EF041E322DE100B003F6F79 /* CameraViewController+View.m */,
 				4EF041E822DE1DAE003F6F79 /* Views */,
 				4EF041DC22DE0229003F6F79 /* CameraHelper.h */,
 				4EF041DD22DE0229003F6F79 /* CameraHelper.m */,
@@ -202,6 +215,7 @@
 				4EF041E722DE1529003F6F79 /* CaptureButton.m in Sources */,
 				4EF041DE22DE0229003F6F79 /* CameraHelper.m in Sources */,
 				4EF041E422DE100B003F6F79 /* CameraViewController+View.m in Sources */,
+				4E1E03A022DF2B1400803E4E /* VideoPreviewController.m in Sources */,
 				4EF041EE22DEBBCF003F6F79 /* CameraSessionController.m in Sources */,
 				4E00D4A422DDF9A5007D6D15 /* AppDelegate.m in Sources */,
 			);

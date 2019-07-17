@@ -16,11 +16,15 @@
 - (id)init{
     self = [super init];
     if (self) {
-        self.backgroundColor = ACTIVE_COLOR;
-        self.layer.masksToBounds = YES;
-        self.layer.borderWidth = 5.0f;
-        self.layer.borderColor = [UIColor whiteColor].CGColor;
-        self.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+//        self.backgroundColor = ACTIVE_COLOR;
+//        self.layer.masksToBounds = YES;
+//        self.layer.borderWidth = 5.0f;
+//        self.layer.borderColor = [UIColor whiteColor].CGColor;
+//        self.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+        
+        [self setImage:[UIImage imageNamed:@"recordButton_InActive"] forState:UIControlStateSelected];
+        [self setImage:[UIImage imageNamed:@"recordButton_Active"] forState:UIControlStateNormal];
+
     }
     
     return self;
@@ -29,12 +33,12 @@
 - (void)setSelected:(BOOL)selected{
     [super setSelected:selected];
     
-    if (selected) {
-        // deep background
-        self.backgroundColor = INACTIVE_COLOR;
-    } else {
-        self.backgroundColor = ACTIVE_COLOR;
-    }
+//    if (selected) {
+//        // deep background
+//        self.backgroundColor = INACTIVE_COLOR;
+//    } else {
+//        self.backgroundColor = ACTIVE_COLOR;
+//    }
 }
 
 

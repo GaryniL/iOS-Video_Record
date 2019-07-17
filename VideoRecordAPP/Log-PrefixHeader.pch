@@ -18,5 +18,6 @@
 #define KSCREENWIDTH  ([UIScreen mainScreen].bounds.size.width)
 #define KSCREENHEIGHT ([UIScreen mainScreen].bounds.size.height)
 #define KRATE (KSCREENWIDTH/320.0)
+#define kVIDEOPATHKEY @"video-url"
 
 #endif /* PrefixHeader_pch */

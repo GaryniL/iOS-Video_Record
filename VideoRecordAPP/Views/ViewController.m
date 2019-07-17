@@ -27,9 +27,9 @@
 - (void)setupUI {
     self.view.backgroundColor = UIColor.whiteColor;
     
-    self.buttonCamera = [UIButton buttonWithType:UIButtonTypeSystem];
-    self.buttonCamera.frame = CGRectMake(10, 25, 150, 75);
-    [self.buttonCamera setTitle:@"Camera" forState:UIControlStateNormal];
+    self.buttonCamera = [[UIButton alloc] init];
+    [self.buttonCamera setImage:[UIImage imageNamed:@"camera"] forState:UIControlStateNormal];
+//    [self.buttonCamera setTitle:@"Camera" forState:UIControlStateNormal];
     [self.buttonCamera addTarget:self action:@selector(buttonCameraTouched:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.buttonCamera];
     [self setupConstraints];
@@ -40,8 +40,8 @@
     [self.buttonCamera setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.buttonCamera attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.buttonCamera attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.buttonCamera attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.3 constant:0.0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.buttonCamera attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.buttonCamera attribute:NSLayoutAttributeWidth multiplier:0.5 constant:0.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.buttonCamera attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.25 constant:0.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.buttonCamera attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.buttonCamera attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
 }
 
 - (void) buttonCameraTouched:(UIButton*)sender {

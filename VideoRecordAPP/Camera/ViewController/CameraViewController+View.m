@@ -11,6 +11,7 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h> //UIBtn
 #import "CameraViewController.h"
+#import "VideoPreviewController.h"
 #import "CaptureButton.h"
 
 // UI config
@@ -92,12 +93,24 @@
     [self.dismissButton setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
     [self.view addSubview:self.dismissButton];
     
+    // preview Button (Right)
+    self.previewButton = [[UIButton alloc] init];
+    [self.previewButton addTarget:self
+                           action:@selector(buttonPreviewTouched:)
+                 forControlEvents:UIControlEventTouchUpInside];
+//    [self.previewButton setTitle:@"預覽" forState:UIControlStateNormal];
+    [self.previewButton setImage:[UIImage imageNamed:@"album"] forState:UIControlStateNormal];
+    [self.previewButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    [self.previewButton setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
+    [self.view addSubview:self.previewButton];
+    
     [self setupConstraints];
 }
 
 - (void) moveNecessaryUItoFront{
     [self.view bringSubviewToFront:self.captureButton];
     [self.view bringSubviewToFront:self.dismissButton];
+    [self.view bringSubviewToFront:self.previewButton];
 }
 
 /**
@@ -107,7 +120,7 @@
     // Capture Button (mid)
     [self.captureButton setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.captureButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.captureButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0 constant:-15.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.captureButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0 constant:-25.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.captureButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:CAMERABUTTONSCALE constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.captureButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
     
@@ -117,6 +130,13 @@
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0.0]];
+    
+    // Preview Button (right)
+    [self.previewButton setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeRight multiplier:1.0 constant:40.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0.0]];
 }
 
 #pragma mark - Button Actions
@@ -133,6 +153,33 @@
     } else {
         [self.cameraSessionController stopVideoRecord];
     }
+    
+    // Check url exist for show the preview button
+    if (self.cameraSessionController.videoURL && sender.isSelected == NO) {
+        [self.previewButton setHidden:NO];
+    } else {
+        [self.previewButton setHidden:YES];
+    }
+}
+
+- (void) buttonPreviewTouched:(UIButton*)sender {
+    NSURL *url ;
+    VideoPreviewController *previewController = [[VideoPreviewController alloc] init];
+    if (self.cameraSessionController.videoURL) {
+        GLog(@"URL: %@",self.cameraSessionController.videoURL);
+        
+        url = self.cameraSessionController.videoURL;
+        
+    } else {
+        GLog(@"Video URL not exist");
+        NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+        url = [NSURL URLWithString:[prefs stringForKey:kVIDEOPATHKEY]];
+        
+    }
+    previewController.videoURL = url;
+    [self presentViewController:previewController animated:YES completion:^{
+        
+    }];
 }
 
 
