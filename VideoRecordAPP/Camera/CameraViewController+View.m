@@ -16,6 +16,11 @@
 // UI config
 #define CAMERABUTTONSCALE 0.2f
 
+
+// TODO
+//1. hint title
+//2. recoding time (Timer)
+
 @interface CameraViewController(View)
 
 @end
@@ -35,20 +40,20 @@
 
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
-    // Check Permission each time back to view
+    // [Video] Check Permission each time back to view
     if ([self.cameraSessionController checkVideoANDAudioPermissionStatus] == NO){
-        // Without Permission
+        // [Video] Without Permission
         [self.cameraSessionController requestAuthForVideoAndAudio];
     }
     
     // Video setup
-    // Important! initial at viewWillAppear preventing crash
+    // [Video] Important! initial at viewWillAppear preventing crash
     [self.cameraSessionController setupCameraSession];
 }
 
 - (void)viewWillLayoutSubviews {
     [super viewWillLayoutSubviews];
-    // Resize cornerRadius for preventing rotate change
+    // [UI] Resize cornerRadius for preventing rotate change
     self.captureButton.layer.cornerRadius = self.view.frame.size.width * CAMERABUTTONSCALE/2;
 }
 
@@ -60,15 +65,21 @@
 - (void)viewDidDisappear:(BOOL)animated {
     [super viewDidDisappear:animated];
     [self.cameraSessionController stopVideoSession];
+    [self.captureVideoPreviewLayer setAffineTransform:CGAffineTransformMakeScale(1, 1)];
+
 }
 
 
-
-
-
+#pragma mark - UI Initial
+/**
+ *  UI elements
+ */
 - (void)setupUI{
     // Capture Button (mid)
     self.captureButton = [[CaptureButton alloc] init];
+    [self.captureButton addTarget:self
+                           action:@selector(buttonRecordTouched:)
+                 forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.captureButton];
     
     // Dismiss Button (left)
@@ -89,7 +100,9 @@
     [self.view bringSubviewToFront:self.dismissButton];
 }
 
-#pragma mark - AutoLayout
+/**
+ *  AutoLayout
+ */
 - (void)setupConstraints{
     // Capture Button (mid)
     [self.captureButton setTranslatesAutoresizingMaskIntoConstraints:NO];
@@ -111,9 +124,17 @@
  *  Close Camera VC
  */
 - (void) buttonDismissTouched:(UIButton*)sender {
-    NSLog(@"You clicked on button %ld", (long)sender.tag);
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+- (void) buttonRecordTouched:(UIButton*)sender {
+    [sender setSelected:!sender.selected];
+    if ([sender isSelected]){
+        [self.cameraSessionController startVideoRecord];
+    } else {
+        [self.cameraSessionController stopVideoRecord];
+    }
+}
+
 
 
 #pragma mark - Show UI
@@ -123,6 +144,9 @@
 
 
 #pragma mark - Video
+/**
+ *  Setup VideoPreviewLayer into UI (delegate method)
+ */
 - (void)setupCaptureVideoPreviewLayer{
     if (!self.captureVideoPreviewLayer) {
         self.captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.cameraSessionController.captureSession];
@@ -134,6 +158,7 @@
     [self.view.layer addSublayer:self.captureVideoPreviewLayer];
     // TODO.新增聚焦手勢
     
+    // [UI] Preventing previewLayer cover all UI
     [self moveNecessaryUItoFront];
 }
 @end
