@@ -14,5 +14,9 @@
 
 #define GLog(fmt, ...) NSLog((@"%s [Line %d] " fmt), __PRETTY_FUNCTION__, __LINE__, ##__VA_ARGS__);
 
+//螢幕尺寸相關
+#define KSCREENWIDTH  ([UIScreen mainScreen].bounds.size.width)
+#define KSCREENHEIGHT ([UIScreen mainScreen].bounds.size.height)
+#define KRATE (KSCREENWIDTH/320.0)
 
 #endif /* PrefixHeader_pch */

@@ -15,6 +15,7 @@
 
 @property (nonatomic, weak) id <CameraSessionViewSource> viewSource;
 @property (nonatomic, strong) AVCaptureSession *captureSession;
+@property (strong, nonatomic) NSURL *videoURL;
 
 - (BOOL) checkVideoANDAudioPermissionStatus;
 - (void) requestAuthForVideoAndAudio;
@@ -22,4 +23,6 @@
 
 - (void) startVideoSession;
 - (void) stopVideoSession;
+- (void) startVideoRecord;
+- (void) stopVideoRecord;
 @end

@@ -10,20 +10,30 @@
 #import <UIKit/UIKit.h>
 
 @interface CameraSessionController()
+
+@property (nonatomic, assign) Boolean isRecording;
+@property (nonatomic, strong) dispatch_queue_t captureQueue;
+
 @property (nonatomic, weak) UIView *cameraView;
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
 
-
+- (AVCaptureSession *)captureSession;
 // Videos
 @property (nonatomic, strong) AVCaptureDeviceInput *videoCaptureInput;
 @property (nonatomic, strong) AVCaptureVideoDataOutput *videoCaptureOutput;
 // Audio
 @property (nonatomic, strong) AVCaptureDeviceInput *audioCaptureInput;
 @property (nonatomic, strong) AVCaptureAudioDataOutput *audioCaptureOutput;
-- (AVCaptureSession *)captureSession;
+// AssetWritter
+@property (nonatomic, strong) AVAssetWriter *assetWriter;
+@property (nonatomic, strong) AVAssetWriterInput *assetWriterVideoInput;
+@property (nonatomic, strong) AVAssetWriterInput *assetWriterAudioInput;
+
 @end
 
 @implementation CameraSessionController
+
+@synthesize isRecording;
 
 //- (id)initWithView:(CameraViewController*)viewController {
 //    self = [self init];
@@ -33,11 +43,13 @@
 
 - (void) setupCameraSession{
     // Add video / audio input/outpur to stream session
+    isRecording = NO;
     [self setupVideoStream];
     [self setupAudioStream];
     [self.viewSource setupCaptureVideoPreviewLayer];
 }
 
+#pragma mark - Video Capture Procedure
 /**
  *  Start AV Session
  *
@@ -57,6 +69,49 @@
     GLog(@"[Video] Stop Session");
     if ([self.captureSession isRunning]){
         [self.captureSession stopRunning];
+    }
+}
+
+/**
+ *  Start AV Session
+ *
+ */
+- (void) startVideoRecord{
+    if (!isRecording){
+        GLog(@"[Video] Start Record");
+        self.isRecording = YES;
+        // Create file path for storing video
+        self.videoURL = [self getVideoPathURL];
+        // Setup Asset Writter for audio/video
+        [self setupVideoWriter];
+    }
+}
+
+- (void) stopVideoRecord{
+    if (isRecording){
+        GLog(@"[Video] Stop Record");
+        //self.assetWriter.status == AVAssetWriterStatusCompleted ||
+        if (self.assetWriter.status == AVAssetWriterStatusUnknown ||
+             self.assetWriter.status == AVAssetWriterStatusFailed || self.assetWriter.status == AVAssetWriterStatusCancelled) {
+            NSLog(@"asset writer was in an unexpected state (%@)", @(self.assetWriter.status));
+            return;
+        } else{
+            
+            if(self.assetWriter && self.assetWriter.status == AVAssetWriterStatusWriting) {
+                [self.assetWriterAudioInput markAsFinished];
+                [self.assetWriterVideoInput markAsFinished];
+                // no use async preventing markAsFinished no sync
+                [self.assetWriter finishWritingWithCompletionHandler:^{
+                    self.isRecording = NO;
+                    self.assetWriter = nil;
+                    self.assetWriterAudioInput = nil;
+                    self.assetWriterVideoInput = nil;
+                    NSLog(@"保存成功");
+                }];
+                
+            }
+        }
+        
     }
 }
 
@@ -116,6 +171,7 @@
 - (void) setupVideoStream{
     NSError *error = nil;
     
+    // =============================================
     // 1.選擇輸入來源(相機, 麥克風, 耳機等等)
     AVCaptureDevice *videoCaptureDevice = [self getVideoDevice];
     if (!videoCaptureDevice) {
@@ -124,6 +180,7 @@
         return;
     }
     
+    // =============================================
     // 2.獲取視訊輸入流
     @try {
         self.videoCaptureInput = [[AVCaptureDeviceInput alloc] initWithDevice:videoCaptureDevice error:nil];
@@ -138,6 +195,7 @@
         }
     }
     
+    // =============================================
     // 4.視訊輸入流加入 AVCaptureSession
     if ([self.captureSession canAddInput:self.videoCaptureInput]) {
         [self.captureSession addInput:self.videoCaptureInput];
@@ -147,6 +205,7 @@
         return;
     }
 
+    // =============================================
     // 5.建立輸出流 AVCaptureVideoDataOutput data output buffer
     self.videoCaptureOutput = [[AVCaptureVideoDataOutput alloc] init];
     if (!self.videoCaptureOutput) {
@@ -155,9 +214,10 @@
         return;
     }
 //    self.videoCaptureOutput.alwaysDiscardsLateVideoFrames = YES;
-    dispatch_queue_t videoQueue = dispatch_queue_create("Video Capture Queue", DISPATCH_QUEUE_SERIAL);
-    [self.videoCaptureOutput setSampleBufferDelegate:self queue:videoQueue];
     
+    [self.videoCaptureOutput setSampleBufferDelegate:self queue:self.captureQueue];
+    
+    // =============================================
     // 6.視訊輸出流加入 AVCaptureSession
     if ([self.captureSession canAddOutput:self.videoCaptureOutput]) {
         [self.captureSession addOutput:self.videoCaptureOutput];
@@ -212,8 +272,7 @@
     }
     
     self.audioCaptureOutput = [[AVCaptureAudioDataOutput alloc] init];
-    dispatch_queue_t audioQueue = dispatch_queue_create("Audio Capture Queue", DISPATCH_QUEUE_SERIAL);
-    [self.audioCaptureOutput setSampleBufferDelegate:self queue:audioQueue];
+    [self.audioCaptureOutput setSampleBufferDelegate:self queue:self.captureQueue];
     
     if([self.captureSession canAddOutput:self.audioCaptureOutput]) {
         [self.captureSession addOutput:self.audioCaptureOutput];
@@ -229,7 +288,80 @@
 
 
 
+#pragma mark - Create Asset Writer
+//1.AssetWriter Init
+//2.Video Setting && AVAssetWriterInput(Video) Init
+//3.Audio Setting && AVAssetWriterInput(Audio) Init
+//4.Add video and audio input to assetWriter
+/**
+ *  Setup Asset writer
+ *
+ */
+- (void) setupVideoWriter{
+    NSError *error = nil;
+    
+    if (self.videoURL == nil) {
+        return;
+    }
+    
+    // =============================================
+    // 1. AssetWriter Init
+    self.assetWriter = [AVAssetWriter assetWriterWithURL:self.videoURL fileType:AVFileTypeMPEG4 error:nil];
+    if (error) {
+        GLog(@"[Asset] Init AssetWriter error：%@", error);
+        return;
+    }
+    
+    // =============================================
+    // 2. Video Setting && AVAssetWriterInput(Video) Init
+    NSDictionary *videoOutputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
+                                   AVVideoCodecH264, AVVideoCodecKey,
+                                   [NSNumber numberWithInt:320], AVVideoWidthKey,
+                                   [NSNumber numberWithInt:640], AVVideoHeightKey,
+                            AVVideoScalingModeResizeAspectFill,AVVideoScalingModeKey,
+                                   nil];
 
+    self.assetWriterVideoInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:videoOutputSettings];
+    // Fetch realtime data from captureSession
+    self.assetWriterVideoInput.expectsMediaDataInRealTime = YES;
+    
+    // =============================================
+    // 3. Audio Setting && AVAssetWriterInput(Audio) Init
+    NSDictionary *audioOutputSettings
+    = [NSDictionary dictionaryWithObjectsAndKeys:
+        @(kAudioFormatMPEG4AAC), AVFormatIDKey,
+        @(1), AVNumberOfChannelsKey,
+        @(44100), AVSampleRateKey,
+        @(64000), AVEncoderBitRateKey,
+//        @(28000), AVEncoderBitRatePerChannelKey,
+       nil];
+    self.assetWriterAudioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:audioOutputSettings];
+    self.assetWriterAudioInput.expectsMediaDataInRealTime = YES;
+    
+    
+    // =============================================
+    // 4. Add video and audio input to assetWriter
+    @try {
+        if ([self.assetWriter canAddInput:self.assetWriterVideoInput]) {
+            [self.assetWriter addInput:self.assetWriterVideoInput];
+        }
+    } @catch (NSException *exception) {
+        // Print exception information
+        NSLog( @"[Asset] Add error, Reason: %@", exception.reason );
+        return;
+    }
+    
+    @try {
+        if ([self.assetWriter canAddInput:self.assetWriterAudioInput]) {
+            [self.assetWriter addInput:self.assetWriterAudioInput];
+        }
+    } @catch (NSException *exception) {
+        // Print exception information
+        NSLog( @"[Asset] Add error, Reason: %@", exception.reason );
+        return;
+    }
+    GLog(@"[Asset] Asset writer init done");
+}
 
 
 
@@ -267,6 +399,31 @@
     return nil;
 }
 
+- (NSURL*)getVideoPathURL{
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectoryPath = [paths objectAtIndex:0];
+    
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss zzz"];
+    
+    NSString *destDateString = [dateFormatter stringFromDate:[NSDate date]];
+    destDateString = [destDateString stringByReplacingOccurrencesOfString:@" " withString:@"-"];
+    destDateString = [destDateString stringByReplacingOccurrencesOfString:@"+" withString:@"-"];
+    destDateString = [destDateString stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    
+    NSURL *outputURL = [NSURL fileURLWithPath:[documentsDirectoryPath stringByAppendingPathComponent:[[NSString alloc] initWithFormat:(@"%@.mp4"),destDateString]]];
+    NSLog(@"Video URL at %@", outputURL);
+    return outputURL;
+}
+
+- (dispatch_queue_t) captureQueue {
+    if (!_captureQueue)
+    {
+        _captureQueue = dispatch_queue_create("CaptureQueue", DISPATCH_QUEUE_SERIAL);
+    }
+    return _captureQueue;
+}
+
 /**
  *  Get AV Audio Capture Device
  *
@@ -284,4 +441,97 @@
     return [self.viewSource captureVideoPreviewLayer];
 }
 
+
+
+
+
+
+
+
+
+#pragma mark <AVCaptureFileOutputRecordingDelegate>
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+    
+    if (!self.assetWriter){
+        return ;
+    }
+    if (!CMSampleBufferDataIsReady(sampleBuffer)){
+        return ;
+    }
+    
+    if (self.assetWriter.status == AVAssetWriterStatusUnknown) {
+        if ([self.assetWriter startWriting]){
+            [self.assetWriter startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
+        } else {
+            NSLog(@"Starting writing error");
+            return ;
+        }
+        
+    } else if (self.assetWriter.status == AVAssetWriterStatusWriting){
+        if (connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo]){
+            // Thread Lock
+            if (self.assetWriterVideoInput.readyForMoreMediaData){
+                BOOL success = [self.assetWriterVideoInput appendSampleBuffer:sampleBuffer];
+                if (!success){
+                    NSLog(@"Video not success");
+                }
+            }
+        }
+        
+        if (connection == [self.audioCaptureOutput connectionWithMediaType:AVMediaTypeAudio]){
+            // Thread Lock
+            if (self.assetWriterAudioInput.readyForMoreMediaData){
+                BOOL success = [self.assetWriterAudioInput appendSampleBuffer:sampleBuffer];
+                if (!success){
+                    NSLog(@"Video not success");
+                }
+            }
+        }
+    }
+    
+    
+    
+    
+    
+    
+    /*
+    if (self.assetWriter.status == AVAssetWriterStatusUnknown){
+        @synchronized(self){
+            self.isRecording = YES;
+            [self.assetWriter startWriting];
+            [self.assetWriter startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
+        }
+    } else if (self.assetWriter.status == AVAssetWriterStatusWriting){
+        NSLog(@"錄製中");
+        if (connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo]){
+            // Thread Lock
+            @synchronized(self){
+                if (self.assetWriterVideoInput.readyForMoreMediaData){
+                    BOOL success = [self.assetWriterVideoInput appendSampleBuffer:sampleBuffer];
+                    if (!success){
+                        
+                    }
+                }
+            }
+        }
+        
+        if (connection == [self.audioCaptureOutput connectionWithMediaType:AVMediaTypeAudio]){
+            // Thread Lock
+            @synchronized(self){
+                if (self.assetWriterAudioInput.readyForMoreMediaData) {
+                    BOOL success = [self.assetWriterAudioInput appendSampleBuffer:sampleBuffer];
+                    if (!success) {
+                        
+                    }
+                }
+            }
+        }
+    }
+     */
+    
+    
+    
+    
+    
+}
 @end
