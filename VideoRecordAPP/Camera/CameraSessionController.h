@@ -20,6 +20,6 @@
 - (void) requestAuthForVideoAndAudio;
 - (void) setupCameraSession;
 
-- (void) startVideoStream;
+- (void) startVideoSession;
 - (void) stopVideoSession;
 @end

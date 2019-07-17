@@ -54,7 +54,7 @@
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
-    [self.cameraSessionController.captureSession startRunning];
+    [self.cameraSessionController startVideoSession];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -82,6 +82,11 @@
     [self.view addSubview:self.dismissButton];
     
     [self setupConstraints];
+}
+
+- (void) moveNecessaryUItoFront{
+    [self.view bringSubviewToFront:self.captureButton];
+    [self.view bringSubviewToFront:self.dismissButton];
 }
 
 #pragma mark - AutoLayout
@@ -118,17 +123,17 @@
 
 
 #pragma mark - Video
-- (void)setupCaptureVideoPreviewLayer {
+- (void)setupCaptureVideoPreviewLayer{
     if (!self.captureVideoPreviewLayer) {
-        self.captureVideoPreviewLayer = 
+        self.captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.cameraSessionController.captureSession];
     }
-    CALayer *layer = self.view.layer;
-    
-    layer.masksToBounds = YES;
+    self.view.layer.masksToBounds = YES;
     self.captureVideoPreviewLayer.frame = self.view.bounds;
     self.captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     //    self.captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspect;
-    [layer addSublayer:self.captureVideoPreviewLayer];
-    // TODO.新增點按聚焦手勢
+    [self.view.layer addSublayer:self.captureVideoPreviewLayer];
+    // TODO.新增聚焦手勢
+    
+    [self moveNecessaryUItoFront];
 }
 @end

@@ -12,7 +12,7 @@
 @protocol CameraSessionViewSource
 
 - (UIView *)mainView;
-- (AVCaptureVideoPreviewLayer*)captureVideoPreviewLayer:(AVCaptureSession*)captureSession;
+- (AVCaptureVideoPreviewLayer*)captureVideoPreviewLayer;
 - (void)setupCaptureVideoPreviewLayer;
 @end
 

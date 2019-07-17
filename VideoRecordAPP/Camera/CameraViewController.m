@@ -37,9 +37,9 @@
     return self.view;
 }
 
-- (AVCaptureVideoPreviewLayer*)captureVideoPreviewLayer:(AVCaptureSession*)captureSession{
+- (AVCaptureVideoPreviewLayer*)captureVideoPreviewLayer{
     if (!_captureVideoPreviewLayer){
-        _captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:captureSession];
+        _captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.cameraSessionController.captureSession];
     }
     return _captureVideoPreviewLayer;
 }
