@@ -207,7 +207,6 @@
     self.captureVideoPreviewLayer.frame = self.view.bounds;
     self.captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
     [self.view.layer addSublayer:self.captureVideoPreviewLayer];
-    // TODO.新增聚焦手勢
     
     // [UI] Preventing previewLayer cover all UI
     [self moveNecessaryUItoFront];
