@@ -19,7 +19,7 @@
 @property (nonatomic, strong) AVCaptureVideoDataOutput *videoCaptureOutput;
 // Audio
 @property (nonatomic, strong) AVCaptureDeviceInput *audioCaptureInput;
-@property (nonatomic, strong) AVCaptureVideoDataOutput *audioCaptureOutput;
+@property (nonatomic, strong) AVCaptureAudioDataOutput *audioCaptureOutput;
 - (AVCaptureSession *)captureSession;
 @end
 
@@ -37,14 +37,27 @@
     [self setupAudioStream];
     [self.viewSource setupCaptureVideoPreviewLayer];
 }
-- (void) startVideoStream{
+
+/**
+ *  Start AV Session
+ *
+ */
+- (void) startVideoSession{
     GLog(@"[Video] Start Session");
-    
+    if (![self.captureSession isRunning]){
+        [self.captureSession startRunning];
+    }
 }
 
-- (void) stopVideoStream{
+/**
+ *  Stop AV Session
+ *
+ */
+- (void) stopVideoSession{
     GLog(@"[Video] Stop Session");
-    
+    if ([self.captureSession isRunning]){
+        [self.captureSession stopRunning];
+    }
 }
 
 
@@ -268,7 +281,7 @@
 }
 
 - (AVCaptureVideoPreviewLayer *)captureVideoPreviewLayer{
-    return [self.viewSource captureVideoPreviewLayer:self.captureSession];
+    return [self.viewSource captureVideoPreviewLayer];
 }
 
 @end
