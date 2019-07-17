@@ -15,6 +15,7 @@
 // Views - 01-Capture
 @property (strong, nonatomic) UIButton *captureButton;
 @property (strong, nonatomic) UIButton *dismissButton;
+@property (strong, nonatomic) UIButton *previewButton;
 // Views - 02-Preview
 @property (strong, nonatomic) UIButton *capturedCancelButton;
 @property (strong, nonatomic) UIButton *capturedConfirmButton;

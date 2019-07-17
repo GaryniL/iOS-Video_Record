@@ -9,10 +9,12 @@
 #import "CameraSessionController.h"
 #import <UIKit/UIKit.h>
 
+
 @interface CameraSessionController()
 
-@property (nonatomic, assign) Boolean isRecording;
-@property (nonatomic, strong) dispatch_queue_t captureQueue;
+@property (nonatomic, assign) BOOL canWrite;
+@property (nonatomic, strong) dispatch_queue_t captureVideoQueue;
+@property (nonatomic, strong) dispatch_queue_t captureAudioQueue;
 
 @property (nonatomic, weak) UIView *cameraView;
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
@@ -34,16 +36,14 @@
 @implementation CameraSessionController
 
 @synthesize isRecording;
+@synthesize canWrite;
 
-//- (id)initWithView:(CameraViewController*)viewController {
-//    self = [self init];
-//    self.cameraView = viewController;
-//    return self;
-//}
 
 - (void) setupCameraSession{
     // Add video / audio input/outpur to stream session
     isRecording = NO;
+    canWrite = NO;
+    
     [self setupVideoStream];
     [self setupAudioStream];
     [self.viewSource setupCaptureVideoPreviewLayer];
@@ -73,43 +73,49 @@
 }
 
 /**
- *  Start AV Session
+ *  Start Recording
  *
  */
 - (void) startVideoRecord{
-    if (!isRecording){
+    if (!isRecording && !self.assetWriter){
         GLog(@"[Video] Start Record");
         self.isRecording = YES;
         // Create file path for storing video
-        self.videoURL = [self getVideoPathURL];
+        self.videoURL = [self getVideoURL];
         // Setup Asset Writter for audio/video
         [self setupVideoWriter];
     }
 }
 
+/**
+ *  Stop Recording
+ *
+ */
 - (void) stopVideoRecord{
-    if (isRecording){
+    if (self.isRecording){
+        self.isRecording = NO;
         GLog(@"[Video] Stop Record");
+
         //self.assetWriter.status == AVAssetWriterStatusCompleted ||
         if (self.assetWriter.status == AVAssetWriterStatusUnknown ||
              self.assetWriter.status == AVAssetWriterStatusFailed || self.assetWriter.status == AVAssetWriterStatusCancelled) {
             NSLog(@"asset writer was in an unexpected state (%@)", @(self.assetWriter.status));
             return;
-        } else{
+        }
+    
+        if(self.assetWriter && self.assetWriter.status == AVAssetWriterStatusWriting) {
+            // no use async preventing markAsFinished not sync
+            __weak __typeof(self)weakSelf = self;
+            [self.assetWriter finishWritingWithCompletionHandler:^{
+//                    [weakSelf.assetWriterAudioInput markAsFinished];
+//                    [weakSelf.assetWriterVideoInput markAsFinished];
+                weakSelf.assetWriter = nil;
+                weakSelf.assetWriterAudioInput = nil;
+                weakSelf.assetWriterVideoInput = nil;
+                [weakSelf saveVideoURL];
+                NSLog(@"保存成功");
+            }];
             
-            if(self.assetWriter && self.assetWriter.status == AVAssetWriterStatusWriting) {
-                [self.assetWriterAudioInput markAsFinished];
-                [self.assetWriterVideoInput markAsFinished];
-                // no use async preventing markAsFinished no sync
-                [self.assetWriter finishWritingWithCompletionHandler:^{
-                    self.isRecording = NO;
-                    self.assetWriter = nil;
-                    self.assetWriterAudioInput = nil;
-                    self.assetWriterVideoInput = nil;
-                    NSLog(@"保存成功");
-                }];
-                
-            }
         }
         
     }
@@ -215,7 +221,7 @@
     }
 //    self.videoCaptureOutput.alwaysDiscardsLateVideoFrames = YES;
     
-    [self.videoCaptureOutput setSampleBufferDelegate:self queue:self.captureQueue];
+    [self.videoCaptureOutput setSampleBufferDelegate:self queue:self.captureVideoQueue];
     
     // =============================================
     // 6.視訊輸出流加入 AVCaptureSession
@@ -226,20 +232,15 @@
 //        [self.cameraView showErrorAlertView:@"[錯誤] 無法加入輸出流"];
         return;
     }
+    
+    AVCaptureConnection *videoConnection = [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo];
+    
+    // default 90 degree rotate
+    if ([videoConnection isVideoOrientationSupported]) {
+        // (portrait)
+        videoConnection.videoOrientation = AVCaptureVideoOrientationPortrait;
+    }
     GLog(@"[Video] Video stream init done");
-    
-    
-//    //防抖功能
-//    _captureMovieFileOutput = [[AVCaptureMovieFileOutput alloc] init];
-//    AVCaptureConnection *captureConnection = [_captureMovieFileOutput connectionWithMediaType:AVMediaTypeAudio];
-//    if ([captureConnection isVideoStabilizationSupported]) {
-//        captureConnection.preferredVideoStabilizationMode = AVCaptureVideoStabilizationModeAuto;
-//    }
-//    //將裝置輸出新增到會話中
-//    if ([_captureSession canAddOutput:_captureMovieFileOutput]) {
-//        [_captureSession addOutput:_captureMovieFileOutput];
-//    }
-
 }
 
 /**
@@ -272,7 +273,7 @@
     }
     
     self.audioCaptureOutput = [[AVCaptureAudioDataOutput alloc] init];
-    [self.audioCaptureOutput setSampleBufferDelegate:self queue:self.captureQueue];
+    [self.audioCaptureOutput setSampleBufferDelegate:self queue:self.captureVideoQueue];
     
     if([self.captureSession canAddOutput:self.audioCaptureOutput]) {
         [self.captureSession addOutput:self.audioCaptureOutput];
@@ -311,16 +312,20 @@
         GLog(@"[Asset] Init AssetWriter error：%@", error);
         return;
     }
+    double w = [UIScreen mainScreen].bounds.size.width;
+    double h = [UIScreen mainScreen].bounds.size.height;
     
+    double width = MIN(w, h);
+    double height = MAX(w, h);
     // =============================================
     // 2. Video Setting && AVAssetWriterInput(Video) Init
     NSDictionary *videoOutputSettings = [NSDictionary dictionaryWithObjectsAndKeys:
                                    AVVideoCodecH264, AVVideoCodecKey,
-                                   [NSNumber numberWithInt:320], AVVideoWidthKey,
-                                   [NSNumber numberWithInt:640], AVVideoHeightKey,
+                                   [NSNumber numberWithInt:width], AVVideoWidthKey,
+                                   [NSNumber numberWithInt:height], AVVideoHeightKey,
                             AVVideoScalingModeResizeAspectFill,AVVideoScalingModeKey,
                                    nil];
-
+    
     self.assetWriterVideoInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeVideo outputSettings:videoOutputSettings];
     // Fetch realtime data from captureSession
     self.assetWriterVideoInput.expectsMediaDataInRealTime = YES;
@@ -338,6 +343,7 @@
     self.assetWriterAudioInput = [AVAssetWriterInput assetWriterInputWithMediaType:AVMediaTypeAudio outputSettings:audioOutputSettings];
     self.assetWriterAudioInput.expectsMediaDataInRealTime = YES;
     
+//    self.assetWriterVideoInput.transform = CGAffineTransformMakeRotation(M_PI / 2.0);
     
     // =============================================
     // 4. Add video and audio input to assetWriter
@@ -361,6 +367,7 @@
         return;
     }
     GLog(@"[Asset] Asset writer init done");
+    canWrite = NO;
 }
 
 
@@ -399,29 +406,41 @@
     return nil;
 }
 
-- (NSURL*)getVideoPathURL{
+
+
+- (void) saveVideoURL{
+    [[NSUserDefaults standardUserDefaults] setObject:self.videoURL.absoluteString forKey:kVIDEOPATHKEY];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+
+- (NSURL*)getVideoURL{
     NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentsDirectoryPath = [paths objectAtIndex:0];
     
     NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss zzz"];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd-HH-mm-ss"];
     
     NSString *destDateString = [dateFormatter stringFromDate:[NSDate date]];
-    destDateString = [destDateString stringByReplacingOccurrencesOfString:@" " withString:@"-"];
-    destDateString = [destDateString stringByReplacingOccurrencesOfString:@"+" withString:@"-"];
-    destDateString = [destDateString stringByReplacingOccurrencesOfString:@":" withString:@"-"];
+    
     
     NSURL *outputURL = [NSURL fileURLWithPath:[documentsDirectoryPath stringByAppendingPathComponent:[[NSString alloc] initWithFormat:(@"%@.mp4"),destDateString]]];
     NSLog(@"Video URL at %@", outputURL);
     return outputURL;
 }
 
-- (dispatch_queue_t) captureQueue {
-    if (!_captureQueue)
+- (dispatch_queue_t) captureVideoQueue {
+    if (!_captureVideoQueue)
     {
-        _captureQueue = dispatch_queue_create("CaptureQueue", DISPATCH_QUEUE_SERIAL);
+        _captureVideoQueue = dispatch_queue_create("CaptureVideoQueue", DISPATCH_QUEUE_SERIAL);
     }
-    return _captureQueue;
+    return _captureVideoQueue;
+}
+- (dispatch_queue_t) captureAudioQueue {
+    if (!_captureAudioQueue)
+    {
+        _captureAudioQueue = dispatch_queue_create("CaptureAudioQueue", DISPATCH_QUEUE_SERIAL);
+    }
+    return _captureAudioQueue;
 }
 
 /**
@@ -452,86 +471,51 @@
 #pragma mark <AVCaptureFileOutputRecordingDelegate>
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
     
+    if (sampleBuffer == NULL){
+        return;
+    }
     if (!self.assetWriter){
         return ;
     }
-    if (!CMSampleBufferDataIsReady(sampleBuffer)){
-        return ;
-    }
+
     
-    if (self.assetWriter.status == AVAssetWriterStatusUnknown) {
-        if ([self.assetWriter startWriting]){
-            [self.assetWriter startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
-        } else {
-            NSLog(@"Starting writing error");
-            return ;
-        }
-        
-    } else if (self.assetWriter.status == AVAssetWriterStatusWriting){
-        if (connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo]){
-            // Thread Lock
-            if (self.assetWriterVideoInput.readyForMoreMediaData){
-                BOOL success = [self.assetWriterVideoInput appendSampleBuffer:sampleBuffer];
-                if (!success){
-                    NSLog(@"Video not success");
-                }
-            }
-        }
-        
-        if (connection == [self.audioCaptureOutput connectionWithMediaType:AVMediaTypeAudio]){
-            // Thread Lock
-            if (self.assetWriterAudioInput.readyForMoreMediaData){
-                BOOL success = [self.assetWriterAudioInput appendSampleBuffer:sampleBuffer];
-                if (!success){
-                    NSLog(@"Video not success");
-                }
-            }
-        }
-    }
-    
-    
-    
-    
-    
-    
-    /*
-    if (self.assetWriter.status == AVAssetWriterStatusUnknown){
-        @synchronized(self){
-            self.isRecording = YES;
+    // Thread Lock
+    @synchronized(self)
+    {
+        // TODO thread problem..?
+        if (!self.canWrite && connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo] && self.assetWriter.status == AVAssetWriterStatusUnknown) {
             [self.assetWriter startWriting];
             [self.assetWriter startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
+            self.canWrite = YES;
         }
-    } else if (self.assetWriter.status == AVAssetWriterStatusWriting){
-        NSLog(@"錄製中");
-        if (connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo]){
-            // Thread Lock
-            @synchronized(self){
-                if (self.assetWriterVideoInput.readyForMoreMediaData){
-                    BOOL success = [self.assetWriterVideoInput appendSampleBuffer:sampleBuffer];
-                    if (!success){
-                        
-                    }
-                }
-            }
-        }
-        
-        if (connection == [self.audioCaptureOutput connectionWithMediaType:AVMediaTypeAudio]){
-            // Thread Lock
-            @synchronized(self){
-                if (self.assetWriterAudioInput.readyForMoreMediaData) {
-                    BOOL success = [self.assetWriterAudioInput appendSampleBuffer:sampleBuffer];
-                    if (!success) {
-                        
-                    }
+    }
+    
+    // Video Write in
+    if (connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo]) {
+        @synchronized(self)
+        {
+            // Prevent stop and still inputing buffer
+            if (isRecording){
+                if (self.assetWriterVideoInput.readyForMoreMediaData) {
+                    [self.assetWriterVideoInput appendSampleBuffer:sampleBuffer];
                 }
             }
         }
     }
-     */
     
-    
-    
-    
-    
+    // Audio Write in
+    if (connection == [self.audioCaptureOutput connectionWithMediaType:AVMediaTypeAudio]) {
+        // Important!! Safe thread lock
+        @synchronized(self) {
+            // Prevent stop and still inputing buffer
+            if (isRecording) {
+                if (self.assetWriterAudioInput.readyForMoreMediaData) {
+                    [self.assetWriterAudioInput appendSampleBuffer:sampleBuffer];
+                }
+            }
+        }
+    }
 }
+
+
 @end
