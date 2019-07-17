@@ -16,5 +16,7 @@
 - (void)setupCaptureVideoPreviewLayer;
 - (void)showAlertView:(NSString*)title message:(NSString*)message completion:(void (^)(void))completion;
 - (void)showPreviewVideoVC:(NSURL*)url;
+
+- (UIView*)getpreviewView;
 @end
 

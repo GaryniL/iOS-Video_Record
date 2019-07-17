@@ -12,6 +12,7 @@
 
 @interface CameraViewController : UIViewController <CameraSessionViewSource>
 
+@property (strong, nonatomic) UIView *previewView;
 // Views - 01-Capture
 @property (strong, nonatomic) UIButton *captureButton;
 @property (strong, nonatomic) UIButton *dismissButton;

@@ -30,6 +30,8 @@
 @property (nonatomic, strong) AVAssetWriterInput *assetWriterVideoInput;
 @property (nonatomic, strong) AVAssetWriterInput *assetWriterAudioInput;
 
+@property (nonatomic, strong) CIFilter * filter;
+@property (nonatomic, strong) CIContext *ciContext;
 @end
 
 @implementation CameraSessionController
@@ -76,6 +78,8 @@
  *
  */
 - (void) startVideoRecord{
+    self.ciContext = [CIContext contextWithOptions:@{kCIContextUseSoftwareRenderer : @(YES)}];
+
     if (!isRecording && !self.assetWriter){
         GLog(@"[Video] Start Record");
         self.isRecording = YES;
@@ -479,7 +483,78 @@
     if (!self.assetWriter){
         return ;
     }
-
+    
+    UIView* preview = [self.viewSource getpreviewView];
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    
+    CMSampleBufferRef pixelBuffer;
+    if (imageBuffer) {
+        CIImage *ciImage = [CIImage imageWithCVImageBuffer:imageBuffer];
+        
+        // Implement Filter
+        // https://developer.apple.com/documentation/coreimage?language=objc#3230489
+        self.filter = [CIFilter filterWithName:@"CIXRay"];
+        [self.filter setValue:ciImage forKey:@"inputImage"];
+        
+        CIImage *outputImage = [self.filter outputImage];
+        CGImageRef outputImageRef = [self.ciContext createCGImage:outputImage fromRect:outputImage.extent];
+        
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            preview.layer.contents = (__bridge id )(outputImageRef);
+            CGImageRelease(outputImageRef);
+        });
+        
+        // Turn CIImage to CMSampleBufferRef
+        // https://stackoverflow.com/questions/18851949/how-to-convert-ciimage-to-cmsamplebufferref
+        // https://stackoverflow.com/questions/47576163/cicontext-render-tocvpixelbuffer-bounds-colorspace-function-does-not-work-fo
+        //  https://stackoverflow.com/questions/15693784/crop-cmsamplebufferref
+        // http://allmybrain.com/2011/12/08/rendering-to-a-texture-with-ios-5-texture-cache-api/
+        
+        CFDictionaryRef empty; // empty value for attr value.
+        CFMutableDictionaryRef attrs;
+        empty = CFDictionaryCreate(kCFAllocatorDefault, // our empty IOSurface properties dictionary
+                                   NULL,
+                                   NULL,
+                                   0,
+                                   &kCFTypeDictionaryKeyCallBacks,
+                                   &kCFTypeDictionaryValueCallBacks);
+        attrs = CFDictionaryCreateMutable(kCFAllocatorDefault,
+                                          1,
+                                          &kCFTypeDictionaryKeyCallBacks,
+                                          &kCFTypeDictionaryValueCallBacks);
+        
+        CFDictionarySetValue(attrs,
+                             kCVPixelBufferIOSurfacePropertiesKey,
+                             empty);
+        
+        double w = [UIScreen mainScreen].bounds.size.width;
+        double h = [UIScreen mainScreen].bounds.size.height;
+        
+        double width = MIN(w, h);
+        double height = MAX(w, h);
+        
+        CVPixelBufferCreate(kCFAllocatorDefault, width*3, height*3, kCVPixelFormatType_32BGRA, attrs, &pixelBuffer);
+        ///????? why x3
+        
+        CVPixelBufferLockBaseAddress( pixelBuffer, 0 );
+        
+        CIContext * ciContext = [CIContext contextWithOptions: nil];
+        [ciContext render:outputImage toCVPixelBuffer:pixelBuffer];
+        CVPixelBufferUnlockBaseAddress( pixelBuffer, 0 );
+        
+        CMSampleTimingInfo sampleTime = {
+            .duration = CMSampleBufferGetDuration(sampleBuffer),
+            .presentationTimeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer),
+            .decodeTimeStamp = CMSampleBufferGetDecodeTimeStamp(sampleBuffer)
+        };
+        
+        CMVideoFormatDescriptionRef videoInfo = NULL;
+        CMVideoFormatDescriptionCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer, &videoInfo);
+        
+        CMSampleBufferCreateForImageBuffer(kCFAllocatorDefault, pixelBuffer, true, NULL, NULL, videoInfo, &sampleTime, &pixelBuffer);
+    }
+    
+    
     
     // Thread Lock
     @synchronized(self)
@@ -499,7 +574,7 @@
             // Prevent stop and still inputing buffer
             if (isRecording){
                 if (self.assetWriterVideoInput.readyForMoreMediaData) {
-                    [self.assetWriterVideoInput appendSampleBuffer:sampleBuffer];
+                    [self.assetWriterVideoInput appendSampleBuffer:pixelBuffer];
                 }
             }
         }

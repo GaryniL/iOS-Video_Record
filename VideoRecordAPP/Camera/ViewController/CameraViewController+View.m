@@ -76,6 +76,9 @@
  *  UI elements
  */
 - (void)setupUI{
+    self.previewView = [[UIView alloc] initWithFrame:self.view.bounds];
+    [self.view addSubview:self.previewView];
+    
     // Capture Button (mid)
     self.captureButton = [[CaptureButton alloc] init];
     [self.captureButton addTarget:self
@@ -108,9 +111,11 @@
 }
 
 - (void) moveNecessaryUItoFront{
+    [self.view bringSubviewToFront:self.previewView];
     [self.view bringSubviewToFront:self.captureButton];
     [self.view bringSubviewToFront:self.dismissButton];
     [self.view bringSubviewToFront:self.previewButton];
+    
 }
 
 /**
@@ -211,5 +216,8 @@
     
     // [UI] Preventing previewLayer cover all UI
     [self moveNecessaryUItoFront];
+}
+- (UIView*)getpreviewView{
+    return self.previewView;
 }
 @end
