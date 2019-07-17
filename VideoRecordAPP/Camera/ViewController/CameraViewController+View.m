@@ -164,32 +164,37 @@
 
 - (void) buttonPreviewTouched:(UIButton*)sender {
     NSURL *url ;
-    VideoPreviewController *previewController = [[VideoPreviewController alloc] init];
     if (self.cameraSessionController.videoURL) {
         GLog(@"URL: %@",self.cameraSessionController.videoURL);
-        
         url = self.cameraSessionController.videoURL;
-        
     } else {
         GLog(@"Video URL not exist");
         NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
         url = [NSURL URLWithString:[prefs stringForKey:kVIDEOPATHKEY]];
-        
     }
-    previewController.videoURL = url;
-    [self presentViewController:previewController animated:YES completion:^{
-        
-    }];
+    [self showPreviewVideoVC:url];
+    
 }
 
 
 
 #pragma mark - Show UI
-- (void) showErrorAlertView:(NSString*)content{
-    NSLog(@"=============>%@",content);
+
+- (void)showAlertView:(NSString*)title message:(NSString*)message completion:(void (^)(UIAlertAction *action))action{
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:action];
+    [alertController addAction:okAction];
+    [self presentViewController:alertController animated:YES completion:nil];
 }
 
-
+- (void)showPreviewVideoVC:(NSURL*)url{
+    VideoPreviewController *previewController = [[VideoPreviewController alloc] init];
+    previewController.videoURL = url;
+    [self presentViewController:previewController animated:YES completion:^{
+        
+    }];
+}
 #pragma mark - Video
 /**
  *  Setup VideoPreviewLayer into UI (delegate method)
@@ -201,9 +206,7 @@
     self.view.layer.masksToBounds = YES;
     self.captureVideoPreviewLayer.frame = self.view.bounds;
     self.captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    //    self.captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspect;
     [self.view.layer addSublayer:self.captureVideoPreviewLayer];
-    // TODO.新增聚焦手勢
     
     // [UI] Preventing previewLayer cover all UI
     [self moveNecessaryUItoFront];

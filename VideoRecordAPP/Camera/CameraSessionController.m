@@ -14,7 +14,6 @@
 
 @property (nonatomic, assign) BOOL canWrite;
 @property (nonatomic, strong) dispatch_queue_t captureVideoQueue;
-@property (nonatomic, strong) dispatch_queue_t captureAudioQueue;
 
 @property (nonatomic, weak) UIView *cameraView;
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
@@ -87,6 +86,11 @@
     }
 }
 
+- (void) saveVideoDone{
+    [self.viewSource showAlertView:@"完成儲存" message:@"點擊確定檢視您錄製的影片" completion:^{
+        [self.viewSource showPreviewVideoVC:self.videoURL];
+    }];
+}
 /**
  *  Stop Recording
  *
@@ -113,6 +117,7 @@
                 weakSelf.assetWriterAudioInput = nil;
                 weakSelf.assetWriterVideoInput = nil;
                 [weakSelf saveVideoURL];
+                [weakSelf saveVideoDone];
                 NSLog(@"保存成功");
             }];
             
@@ -434,13 +439,6 @@
         _captureVideoQueue = dispatch_queue_create("CaptureVideoQueue", DISPATCH_QUEUE_SERIAL);
     }
     return _captureVideoQueue;
-}
-- (dispatch_queue_t) captureAudioQueue {
-    if (!_captureAudioQueue)
-    {
-        _captureAudioQueue = dispatch_queue_create("CaptureAudioQueue", DISPATCH_QUEUE_SERIAL);
-    }
-    return _captureAudioQueue;
 }
 
 /**
