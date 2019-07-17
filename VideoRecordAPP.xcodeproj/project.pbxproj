@@ -117,8 +117,8 @@
 		4EF041E222DE0BF9003F6F79 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
-				4E1E039D22DF2AEF00803E4E /* ViewController */,
 				4E1E039922DED26200803E4E /* CameraSessionViewSource.h */,
+				4E1E039D22DF2AEF00803E4E /* ViewController */,
 				4EF041E822DE1DAE003F6F79 /* Views */,
 				4EF041DC22DE0229003F6F79 /* CameraHelper.h */,
 				4EF041DD22DE0229003F6F79 /* CameraHelper.m */,
