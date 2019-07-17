@@ -159,8 +159,10 @@
  */
 - (void) requestAuthForVideoAndAudio{
     //requestAuthorizationForVideo()
-    // TODO. alert view
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    [self.viewSource showAlertView:@"無法取得相機權限" message:@"點擊前往設定.app授予權限" completion:^{
+        [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
+    }];
+    
 }
 
 
@@ -224,7 +226,9 @@
 //        [self.cameraView showErrorAlertView:@"[錯誤] 無法輸出輸出流"];
         return;
     }
-//    self.videoCaptureOutput.alwaysDiscardsLateVideoFrames = YES;
+    
+    // This ensures that any late video frames are dropped rather than output to delegate.
+    self.videoCaptureOutput.alwaysDiscardsLateVideoFrames = YES;
     
     [self.videoCaptureOutput setSampleBufferDelegate:self queue:self.captureVideoQueue];
     
