@@ -1,12 +1,16 @@
 # iOS-Video_Record
 Recording Video implemented by AVFoundation Framework
 
+
+
 ## Branch
 
 1. **master**
    An video capturing camera APP
+   ![IMG_0068](images/IMG_0068.PNG)
 2. **Filter-beta**
    For beta feature - realtime filtered (XRay) previewing and recording, based on master branch.
+   ![IMG_0067](images/IMG_0067.PNG)
 
 ### Using Framework:
 
@@ -56,7 +60,7 @@ d. turn CIImage back to SampleBuffer then save
 
 13. released assetWriter after all procedure done
 
-
+![IMG_0071](images/IMG_0071.PNG)
 
 
 
@@ -73,7 +77,7 @@ UI allocate in <code>CameraViewController</code> bind controller with <code><Ca
 
 - AVPlayerLayer for showing video result
 
-
+![IMG_0070](images/IMG_0070.PNG)
 
 ## Future Work
 
