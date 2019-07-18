@@ -12,10 +12,9 @@
 
 @interface CameraSessionController()
 
-@property (nonatomic, assign) BOOL canWrite;
+@property (nonatomic, assign) BOOL isStartWrite;
 @property (nonatomic, strong) dispatch_queue_t captureVideoQueue;
 
-@property (nonatomic, weak) UIView *cameraView;
 @property (nonatomic, weak) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
 
 - (AVCaptureSession *)captureSession;
@@ -35,13 +34,13 @@
 @implementation CameraSessionController
 
 @synthesize isRecording;
-@synthesize canWrite;
+@synthesize isStartWrite;
 
 
 - (void) setupCameraSession{
     // Add video / audio input/outpur to stream session
     isRecording = NO;
-    canWrite = NO;
+    isStartWrite = NO;
     
     [self setupVideoStream];
     [self setupAudioStream];
@@ -376,7 +375,7 @@
         return;
     }
     GLog(@"[Asset] Asset writer init done");
-    canWrite = NO;
+    isStartWrite = NO;
 }
 
 
@@ -454,10 +453,6 @@
     return [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeAudio];
 }
 
-- (UIView *)cameraView{
-    return self.viewSource.mainView;
-}
-
 - (AVCaptureVideoPreviewLayer *)captureVideoPreviewLayer{
     return [self.viewSource captureVideoPreviewLayer];
 }
@@ -485,10 +480,10 @@
     @synchronized(self)
     {
         // TODO thread problem..?
-        if (!self.canWrite && connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo] && self.assetWriter.status == AVAssetWriterStatusUnknown) {
+        if (!self.isStartWrite && connection == [self.videoCaptureOutput connectionWithMediaType:AVMediaTypeVideo] && self.assetWriter.status == AVAssetWriterStatusUnknown) {
             [self.assetWriter startWriting];
             [self.assetWriter startSessionAtSourceTime:CMSampleBufferGetPresentationTimeStamp(sampleBuffer)];
-            self.canWrite = YES;
+            self.isStartWrite = YES;
         }
     }
     

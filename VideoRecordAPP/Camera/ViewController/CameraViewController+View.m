@@ -11,7 +11,6 @@
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h> //UIBtn
 #import "CameraViewController.h"
-#import "VideoPreviewController.h"
 #import "CaptureButton.h"
 
 // UI config
@@ -178,37 +177,6 @@
 
 
 
-#pragma mark - Show UI
 
-- (void)showAlertView:(NSString*)title message:(NSString*)message completion:(void (^)(UIAlertAction *action))action{
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
-    
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:action];
-    [alertController addAction:okAction];
-    [self presentViewController:alertController animated:YES completion:nil];
-}
 
-- (void)showPreviewVideoVC:(NSURL*)url{
-    VideoPreviewController *previewController = [[VideoPreviewController alloc] init];
-    previewController.videoURL = url;
-    [self presentViewController:previewController animated:YES completion:^{
-        
-    }];
-}
-#pragma mark - Video
-/**
- *  Setup VideoPreviewLayer into UI (delegate method)
- */
-- (void)setupCaptureVideoPreviewLayer{
-    if (!self.captureVideoPreviewLayer) {
-        self.captureVideoPreviewLayer = [[AVCaptureVideoPreviewLayer alloc] initWithSession:self.cameraSessionController.captureSession];
-    }
-    self.view.layer.masksToBounds = YES;
-    self.captureVideoPreviewLayer.frame = self.view.bounds;
-    self.captureVideoPreviewLayer.videoGravity = AVLayerVideoGravityResizeAspectFill;
-    [self.view.layer addSublayer:self.captureVideoPreviewLayer];
-    
-    // [UI] Preventing previewLayer cover all UI
-    [self moveNecessaryUItoFront];
-}
 @end

@@ -11,7 +11,6 @@
 
 @protocol CameraSessionViewSource
 
-- (UIView *)mainView;
 - (AVCaptureVideoPreviewLayer*)captureVideoPreviewLayer;
 - (void)setupCaptureVideoPreviewLayer;
 - (void)showAlertView:(NSString*)title message:(NSString*)message completion:(void (^)(void))completion;
