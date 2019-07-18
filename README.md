@@ -82,7 +82,7 @@ UI allocate in <code>CameraViewController</code> bind controller with <code><Ca
 ## Future Work
 
 1. More detailed UI 
-   [] Album video chooser (UITableView)
+   [x] Album video chooser (UITableView)
    [] Filter option (UIPicker)
    [x] Recording time (NSTimer)
 2. Switch front / back camera (AVCaptureDevice)

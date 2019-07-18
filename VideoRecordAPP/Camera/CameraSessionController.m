@@ -546,14 +546,13 @@
 - (void)timePassing{
     timeDuration += 0.1;
     [self.viewSource setTimerText:[NSString stringWithFormat:@"%.2f",timeDuration]];
-    NSLog(@"T: %f",timeDuration);
 }
 
 - (void)timerStop {
-    [self.viewSource setTimerText:[NSString stringWithFormat:@"%.2f",0.0]];
     if ([self.timer isValid]) {
         [self.timer invalidate];
         self.timer = nil;
+        [self.viewSource setTimerText:[NSString stringWithFormat:@"%.2f",0.0]];
     }
 }
 
