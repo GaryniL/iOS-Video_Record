@@ -14,6 +14,7 @@
 - (AVCaptureVideoPreviewLayer*)captureVideoPreviewLayer;
 - (void)setupCaptureVideoPreviewLayer;
 - (void)showPreviewVideoVC:(NSURL*)url;
+- (void)setTimerText:(NSString*)text;
 
 
 - (void)showAlertView:(NSString*)title message:(NSString*)message completion:(void (^)(void))completion;

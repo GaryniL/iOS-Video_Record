@@ -29,9 +29,14 @@
 @property (nonatomic, strong) AVAssetWriterInput *assetWriterVideoInput;
 @property (nonatomic, strong) AVAssetWriterInput *assetWriterAudioInput;
 
+@property (nonatomic, strong) NSTimer *timer;
+
+
 @end
 
-@implementation CameraSessionController
+@implementation CameraSessionController{
+    CGFloat timeDuration;
+}
 
 @synthesize isRecording;
 @synthesize isStartWrite;
@@ -92,6 +97,7 @@
         self.videoURL = [self getVideoURL];
         // Setup Asset Writter for audio/video
         [self setupVideoWriter];
+        [self timerStart];
     }
 }
 
@@ -108,6 +114,7 @@
     if (self.isRecording){
         self.isRecording = NO;
         GLog(@"[Video] Stop Record");
+        [self timerStop];
 
         //self.assetWriter.status == AVAssetWriterStatusCompleted ||
         if (self.assetWriter.status == AVAssetWriterStatusUnknown ||
@@ -525,6 +532,28 @@
                 }
             }
         }
+    }
+}
+
+
+
+
+- (void)timerStart{
+    timeDuration = 0;
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:0.1 target:self selector:@selector(timePassing) userInfo:nil repeats:YES];
+}
+
+- (void)timePassing{
+    timeDuration += 0.1;
+    [self.viewSource setTimerText:[NSString stringWithFormat:@"%.2f",timeDuration]];
+    NSLog(@"T: %f",timeDuration);
+}
+
+- (void)timerStop {
+    [self.viewSource setTimerText:[NSString stringWithFormat:@"%.2f",0.0]];
+    if ([self.timer isValid]) {
+        [self.timer invalidate];
+        self.timer = nil;
     }
 }
 

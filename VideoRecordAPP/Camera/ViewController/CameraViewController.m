@@ -73,4 +73,8 @@
     }];
 }
 
+- (void)setTimerText:(NSString*)text{
+    self.timeLabel.text = text;
+}
+
 @end

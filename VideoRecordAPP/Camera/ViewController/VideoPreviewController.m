@@ -71,6 +71,17 @@
 - (void)previewVideo{
     if (self.videoURL == nil){
         GLog(@"url: %@",self.videoURL);
+        NSFileManager *fileManager = [NSFileManager defaultManager];
+        
+        if (![fileManager fileExistsAtPath:self.videoURL.absoluteString]){
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"查無此片" message:@"點擊確定回到上一頁" preferredStyle:UIAlertControllerStyleAlert];
+            
+            UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"確定" style:UIAlertActionStyleDefault handler:^(UIAlertAction* action){
+                [self dismissViewControllerAnimated:YES completion:^{}];
+            }];
+            [alertController addAction:okAction];
+            [self presentViewController:alertController animated:YES completion:nil];
+        }
         return;
     }
     

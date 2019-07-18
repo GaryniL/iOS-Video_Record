@@ -17,6 +17,8 @@
 @property (strong, nonatomic) UIButton *dismissButton;
 @property (strong, nonatomic) UIButton *previewButton;
 
+@property (strong, nonatomic) UILabel *timeLabel;
+
 // AVVideo
 @property (strong, nonatomic) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;
 

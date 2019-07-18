@@ -103,6 +103,13 @@
 			path = ViewController;
 			sourceTree = "<group>";
 		};
+		4ED33CD022E04E220052AB49 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		4EF041D622DDFE1B003F6F79 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -115,6 +122,7 @@
 		4EF041E222DE0BF9003F6F79 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				4ED33CD022E04E220052AB49 /* Model */,
 				4E1E039922DED26200803E4E /* CameraSessionViewSource.h */,
 				4E1E039D22DF2AEF00803E4E /* ViewController */,
 				4EF041E822DE1DAE003F6F79 /* Views */,

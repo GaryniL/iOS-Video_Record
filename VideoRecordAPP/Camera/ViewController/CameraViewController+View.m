@@ -103,6 +103,13 @@
     [self.previewButton setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
     [self.view addSubview:self.previewButton];
     
+    self.timeLabel = [[UILabel alloc] init];
+    [self.timeLabel setTextColor:UIColor.whiteColor];
+    [self.timeLabel setFont:[UIFont boldSystemFontOfSize:16]];
+    self.timeLabel.text = @"按下開始錄影";
+    self.timeLabel.textAlignment = UITextAlignmentCenter;
+    [self.view addSubview:self.timeLabel];
+
     [self setupConstraints];
 }
 
@@ -110,6 +117,7 @@
     [self.view bringSubviewToFront:self.captureButton];
     [self.view bringSubviewToFront:self.dismissButton];
     [self.view bringSubviewToFront:self.previewButton];
+    [self.view bringSubviewToFront:self.timeLabel];
 }
 
 /**
@@ -136,6 +144,13 @@
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeCenterY relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeCenterY multiplier:1.0 constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.previewButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeHeight multiplier:1.0 constant:0.0]];
+    
+    // Label (mid)
+    [self.timeLabel setTranslatesAutoresizingMaskIntoConstraints:NO];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.timeLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.timeLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeTop multiplier:1.0 constant:-5.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.timeLabel attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
+    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.timeLabel attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.captureButton attribute:NSLayoutAttributeHeight multiplier:0.8 constant:0.0]];
 }
 
 #pragma mark - Button Actions
@@ -172,7 +187,6 @@
         url = [NSURL URLWithString:[prefs stringForKey:kVIDEOPATHKEY]];
     }
     [self showPreviewVideoVC:url];
-    
 }
 
 
