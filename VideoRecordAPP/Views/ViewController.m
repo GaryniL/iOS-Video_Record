@@ -8,6 +8,7 @@
 
 #import "ViewController.h"
 #import "VideoPreviewController.h"
+#import "FileViewController.h"
 
 @interface ViewController ()
 
@@ -86,16 +87,22 @@
 }
 
 - (void) buttonGalleryTouched:(UIButton*)sender {
-    NSURL *url = [self url];
-    if([self checkURLValid]){
-        VideoPreviewController *previewController = [[VideoPreviewController alloc] init];
-        previewController.videoURL = [self url];
-        [self presentViewController:previewController animated:YES completion:^{
-            
-        }];
-    } else {
-        sender.alpha = 0.25;
-    }
+//    NSURL *url = [self url];
+//    if([self checkURLValid]){
+//        VideoPreviewController *previewController = [[VideoPreviewController alloc] init];
+//        previewController.videoURL = [self url];
+//        [self presentViewController:previewController animated:YES completion:^{
+//
+//        }];
+//    } else {
+//        sender.alpha = 0.25;
+//    }
+    
+    FileViewController *fileVC = [[FileViewController alloc] init];
+    UINavigationController *naviVC = [[UINavigationController alloc] initWithRootViewController:fileVC];
+    [self presentViewController:naviVC animated:YES completion:^{
+    }];
+    
 }
 
 - (void) buttonCameraTouched:(UIButton*)sender {
