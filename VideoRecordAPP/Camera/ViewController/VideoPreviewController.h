@@ -12,6 +12,6 @@
 
 
 @interface VideoPreviewController : UIViewController
-@property (nonatomic, weak) NSURL *videoURL;
+@property (nonatomic, strong) NSURL *videoURL;
 
 @end

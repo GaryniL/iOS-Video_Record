@@ -11,8 +11,5 @@
 
 @interface ViewController : UIViewController
 
-@property (strong, nonatomic) UIButton *buttonCamera;
-@property (strong, nonatomic) UIButton *buttonGallery;
-
 @end
 

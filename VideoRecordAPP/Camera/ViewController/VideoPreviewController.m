@@ -70,6 +70,7 @@
 
 - (void)previewVideo{
     if (self.videoURL == nil){
+        GLog(@"url: %@",self.videoURL);
         return;
     }
     

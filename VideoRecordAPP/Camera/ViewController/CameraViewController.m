@@ -60,7 +60,7 @@
 - (void)showAlertView:(NSString*)title message:(NSString*)message completion:(void (^)(UIAlertAction *action))action{
     UIAlertController *alertController = [UIAlertController alertControllerWithTitle:title message:message preferredStyle:UIAlertControllerStyleAlert];
     
-    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"好的" style:UIAlertActionStyleDefault handler:action];
+    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"確定" style:UIAlertActionStyleDefault handler:action];
     [alertController addAction:okAction];
     [self presentViewController:alertController animated:YES completion:nil];
 }
