@@ -13,7 +13,6 @@
 		4E00D4AC22DDF9A5007D6D15 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4E00D4AB22DDF9A5007D6D15 /* Assets.xcassets */; };
 		4E00D4AF22DDF9A5007D6D15 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4E00D4AD22DDF9A5007D6D15 /* LaunchScreen.storyboard */; };
 		4E00D4B222DDF9A5007D6D15 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E00D4B122DDF9A5007D6D15 /* main.m */; };
-		4E1E039C22DEFD2200803E4E /* CameraSessionController+AV.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E039B22DEFD2200803E4E /* CameraSessionController+AV.m */; };
 		4E1E03A022DF2B1400803E4E /* VideoPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E039F22DF2B1400803E4E /* VideoPreviewController.m */; };
 		4EF041DE22DE0229003F6F79 /* CameraHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF041DD22DE0229003F6F79 /* CameraHelper.m */; };
 		4EF041E122DE0BF2003F6F79 /* CameraViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 4EF041E022DE0BF2003F6F79 /* CameraViewController.m */; };
@@ -34,7 +33,6 @@
 		4E00D4B022DDF9A5007D6D15 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4E00D4B122DDF9A5007D6D15 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		4E1E039922DED26200803E4E /* CameraSessionViewSource.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CameraSessionViewSource.h; sourceTree = "<group>"; };
-		4E1E039B22DEFD2200803E4E /* CameraSessionController+AV.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CameraSessionController+AV.m"; sourceTree = "<group>"; };
 		4E1E039E22DF2B1400803E4E /* VideoPreviewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VideoPreviewController.h; sourceTree = "<group>"; };
 		4E1E039F22DF2B1400803E4E /* VideoPreviewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VideoPreviewController.m; sourceTree = "<group>"; };
 		4EF041DC22DE0229003F6F79 /* CameraHelper.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CameraHelper.h; sourceTree = "<group>"; };
@@ -124,7 +122,6 @@
 				4EF041DD22DE0229003F6F79 /* CameraHelper.m */,
 				4EF041EC22DEBBCF003F6F79 /* CameraSessionController.h */,
 				4EF041ED22DEBBCF003F6F79 /* CameraSessionController.m */,
-				4E1E039B22DEFD2200803E4E /* CameraSessionController+AV.m */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -211,7 +208,6 @@
 				4E00D4A722DDF9A5007D6D15 /* ViewController.m in Sources */,
 				4E00D4B222DDF9A5007D6D15 /* main.m in Sources */,
 				4EF041E122DE0BF2003F6F79 /* CameraViewController.m in Sources */,
-				4E1E039C22DEFD2200803E4E /* CameraSessionController+AV.m in Sources */,
 				4EF041E722DE1529003F6F79 /* CaptureButton.m in Sources */,
 				4EF041DE22DE0229003F6F79 /* CameraHelper.m in Sources */,
 				4EF041E422DE100B003F6F79 /* CameraViewController+View.m in Sources */,

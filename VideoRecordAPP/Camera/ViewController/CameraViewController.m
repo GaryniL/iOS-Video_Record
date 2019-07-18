@@ -14,7 +14,6 @@
 
 @implementation CameraViewController
 
-
 #pragma mark - Singleton
 + (instancetype)defaultCameraController {
     static CameraViewController *sharedInstance = nil;

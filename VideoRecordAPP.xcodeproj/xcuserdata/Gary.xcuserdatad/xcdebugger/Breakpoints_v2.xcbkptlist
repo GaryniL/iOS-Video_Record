@@ -15,8 +15,10 @@
                   shouldBeEnabled = "Yes"
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
+                  symbolName = "initialPoolContent"
+                  moduleName = "dyld"
                   usesParentBreakpointCondition = "Yes"
-                  offsetFromSymbolStart = "0">
+                  offsetFromSymbolStart = "169560">
                </Location>
             </Locations>
          </BreakpointContent>

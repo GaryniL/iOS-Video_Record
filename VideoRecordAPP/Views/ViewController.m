@@ -45,7 +45,6 @@
 }
 
 - (void) buttonCameraTouched:(UIButton*)sender {
-    NSLog(@"You clicked on button %ld", (long)sender.tag);
     __weak id weakSelf = self;
     [CameraHelper startRecord:self delegate:weakSelf];
 }

@@ -42,8 +42,18 @@
     isRecording = NO;
     isStartWrite = NO;
     
-    [self setupVideoStream];
-    [self setupAudioStream];
+    [self setupVideoStream:^(BOOL isSuccess, NSString *errorCnt){
+        if (!isSuccess) {
+            [self.viewSource showAlertView:@"相機初始化錯誤" message:errorCnt completion:nil];
+
+        }
+    }];
+    [self setupAudioStream:^(BOOL isSuccess, NSString *errorCnt){
+        if (!isSuccess) {
+            [self.viewSource showAlertView:@"相機初始化錯誤" message:errorCnt completion:nil];
+            
+        }
+    }];
     [self.viewSource setupCaptureVideoPreviewLayer];
 }
 
@@ -180,15 +190,16 @@
  *  Setup Video Stream with 4 step
  *
  */
-- (void) setupVideoStream{
+- (void) setupVideoStream: (void(^)(BOOL isSuccess, NSString *errorCnt))completeHandle{
     NSError *error = nil;
+    
     
     // =============================================
     // 1.選擇輸入來源(相機, 麥克風, 耳機等等)
     AVCaptureDevice *videoCaptureDevice = [self getVideoDevice];
     if (!videoCaptureDevice) {
         GLog(@"[Video] Get Video device error");
-//        [self.cameraView showErrorAlertView:@"[錯誤] 無法取得相機"];
+        completeHandle(NO, @"Get Video device error");
         return;
     }
     
@@ -199,10 +210,12 @@
     } @catch (NSException *exception) {
         // Print exception information
         NSLog( @"Reason: %@", exception.reason );
+        completeHandle(NO, exception.reason);
         return;
     } @finally {
         if (error) {
             GLog(@"[Video] Get Video Input error：%@", error);
+            completeHandle(NO, error.description);
             return;
         }
     }
@@ -213,7 +226,7 @@
         [self.captureSession addInput:self.videoCaptureInput];
     } else {
         GLog(@"[Video] Add Video input to stream error");
-//        [self.cameraView showErrorAlertView:@"[錯誤] 無法加入輸入流"];
+//        completeHandle(NO, @"Add Video input to stream error");
         return;
     }
 
@@ -222,7 +235,7 @@
     self.videoCaptureOutput = [[AVCaptureVideoDataOutput alloc] init];
     if (!self.videoCaptureOutput) {
         GLog(@"[Video] Export Video output error");
-//        [self.cameraView showErrorAlertView:@"[錯誤] 無法輸出輸出流"];
+        completeHandle(NO, @"Export Video output error");
         return;
     }
     
@@ -237,7 +250,7 @@
         [self.captureSession addOutput:self.videoCaptureOutput];
     } else {
         GLog(@"[Video] Add Video output to stream error");
-//        [self.cameraView showErrorAlertView:@"[錯誤] 無法加入輸出流"];
+        completeHandle(NO, @"Add Video output to stream error");
         return;
     }
     
@@ -256,7 +269,7 @@
  *
  */
 #pragma mark - Create Audio Session
-- (void) setupAudioStream{
+- (void) setupAudioStream: (void(^)(BOOL isSuccess, NSString *errorCnt))completeHandle{
     NSError *error = nil;
     // 2.獲取音訊輸入流
     @try {
@@ -264,10 +277,12 @@
     } @catch (NSException *exception) {
         // Print exception information
         NSLog( @"[Audio] Reason: %@", exception.reason );
+        completeHandle(NO, exception.reason);
         return;
     } @finally {
         if (error) {
             GLog(@"[Audio] Get Video Input error：%@", error);
+            completeHandle(NO, error.description);
             return;
         }
     }
@@ -276,7 +291,7 @@
         [self.captureSession addInput:self.audioCaptureInput];
     } else {
         GLog(@"[Audio] Add Audio input to stream error");
-//        [self.cameraView showErrorAlertView:@"[錯誤] 無法加入音訊輸入流"];
+//        completeHandle(NO, @"Add Audio input to stream error");
         return;
     }
     
@@ -287,11 +302,10 @@
         [self.captureSession addOutput:self.audioCaptureOutput];
     } else {
         GLog(@"[Audio] Add Audio output to stream error");
-//        [self.cameraView showErrorAlertView:@"[錯誤] 無法加入音訊輸出流"];
+        completeHandle(NO, @"Add Audio output to stream error");
         return;
     }
     GLog(@"[Audio] Audio stream init done");
-    
 }
 
 

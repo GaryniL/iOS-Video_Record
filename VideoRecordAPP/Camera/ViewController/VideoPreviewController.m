@@ -13,8 +13,6 @@
 @property (strong, nonatomic) AVPlayerLayer *playerLayer;
 @property (strong, nonatomic) AVPlayer *player;
 @property (strong, nonatomic) AVPlayerItem *playerItem;
-
-@property (strong, nonatomic) UIButton *playButton;
 @property (strong, nonatomic) UIButton *dismissButton;
 @end
 
@@ -36,16 +34,6 @@
     self.view.backgroundColor = UIColor.blackColor;
     
     // Play Button (mid)
-    self.playButton = [[UIButton alloc] init];
-    [self.playButton addTarget:self
-                           action:@selector(buttonPlayTouched:)
-                 forControlEvents:UIControlEventTouchUpInside];
-    [self.playButton setTitle:@"播放" forState:UIControlStateNormal];
-    [self.playButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    [self.playButton setTitleColor:[UIColor grayColor] forState:UIControlStateHighlighted];
-    [self.view addSubview:self.playButton];
-    
-    // Play Button (mid)
     self.dismissButton = [[UIButton alloc] init];
     [self.dismissButton addTarget:self
                         action:@selector(buttonDismissTouched:)
@@ -65,28 +53,12 @@
  *  AutoLayout
  */
 - (void)setupConstraints{
-    // play Button (mid)
-    [self.playButton setTranslatesAutoresizingMaskIntoConstraints:NO];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playButton attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playButton attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeBottom multiplier:1.0 constant:-15.0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.25 constant:0.0]];
-    [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.playButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.playButton attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
-    
     // dismiss Button (mid)
     [self.dismissButton setTranslatesAutoresizingMaskIntoConstraints:NO];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeTop multiplier:1.0 constant:15.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeLeft multiplier:1.0 constant:15.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeWidth relatedBy:NSLayoutRelationEqual toItem:self.view attribute:NSLayoutAttributeWidth multiplier:0.25 constant:0.0]];
     [self.view addConstraint:[NSLayoutConstraint constraintWithItem:self.dismissButton attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:self.dismissButton attribute:NSLayoutAttributeWidth multiplier:1.0 constant:0.0]];
-}
-
-- (void) buttonPlayTouched:(UIButton*)sender {
-    [sender setSelected:!sender.selected];
-    if ([sender isSelected]){
-
-    } else {
-
-    }
 }
 
 - (void) buttonDismissTouched:(UIButton*)sender {

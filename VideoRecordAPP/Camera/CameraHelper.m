@@ -19,9 +19,6 @@
 
 + (void)startRecord:(UIViewController*)viewController delegate:(id<UIImagePickerControllerDelegate, UINavigationControllerDelegate>)delegate{
     CameraViewController *cameraView = [CameraViewController defaultCameraController];
-//    imagePicker.mediaTypes = [[NSArray alloc] initWithObjects:(NSString *)kUTTypeMovie, nil];
-//    imagePicker.sourceType = UIImagePickerControllerSourceTypeCamera;
-//    imagePicker.delegate = delegate;
     [viewController presentViewController:cameraView animated:YES completion:nil];
 }
 
