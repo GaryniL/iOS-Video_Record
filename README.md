@@ -82,9 +82,9 @@ UI allocate in <code>CameraViewController</code> bind controller with <code><Ca
 ## Future Work
 
 1. More detailed UI 
-   - Album video chooser (UITableView)
-   - Filter option (UIPicker)
-   - Recording time (NSTimer)
+   [] Album video chooser (UITableView)
+   [] Filter option (UIPicker)
+   [x] Recording time (NSTimer)
 2. Switch front / back camera (AVCaptureDevice)
 3. Focus / Exposure on touch (UI -> onTouchPoint->setFocusPointOfInterest)
 4. Landscape mode handle
