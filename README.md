@@ -8,6 +8,15 @@ Recording Video implemented by AVFoundation Framework
 2. **Filter-beta**
    For beta feature - realtime filtered (XRay) previewing and recording, based on master branch.
 
+### Using Framework:
+
+- AVFoundation
+- AssetsLibrary
+- AVKit
+- Core Video
+- Core Image 
+
+
 
 ## Flow
 
